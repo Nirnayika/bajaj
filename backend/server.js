@@ -7,28 +7,37 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 
+// Middleware to log incoming requests
+app.use((req, res, next) => {
+  console.log(`Request Method: ${req.method}, Request URL: ${req.url}`);
+  next();
+});
+
 // Helper function to get file details from base64 string
 function getFileDetails(base64String) {
   if (!base64String) {
     return { file_valid: false };
   }
 
-  try {
-    const [metaData, base64Data] = base64String.split(',');
-    const mimeType = metaData.match(/data:(.*);base64/)[1];
-    const fileSize = Math.round((base64Data.length * 3) / 4 / 1024); // Size in KB
-
-    return {
-      file_valid: true,
-      file_mime_type: mimeType,
-      file_size_kb: fileSize.toString()
-    };
-  } catch (error) {
+  const [metaData, base64Data] = base64String.split(',');
+  if (!metaData || !base64Data) {
     return { file_valid: false };
   }
+
+  const mimeType = metaData.match(/data:(.*);base64/)[1];
+  const fileSize = Math.round((base64Data.length * 3) / 4 / 1024); // Size in KB
+
+  return {
+    file_valid: true,
+    file_mime_type: mimeType,
+    file_size_kb: fileSize.toString()
+  };
 }
 
+// Change route to /bfhl
 app.post('/bfhl', (req, res) => {
+  console.log('Received request body:', req.body); // Log the request body
+
   const { data, file_b64 } = req.body;
 
   if (!data || !Array.isArray(data)) {
@@ -42,9 +51,9 @@ app.post('/bfhl', (req, res) => {
 
   const response = {
     is_success: true,
-    user_id: "john_doe_17091999", // Replace with actual user_id logic
-    email: "john@xyz.com", // Replace with actual email
-    roll_number: "ABCD123", // Replace with actual roll number
+    user_id: "john_doe_17091999",
+    email: "john@xyz.com",
+    roll_number: "ABCD123",
     numbers,
     alphabets,
     highest_lowercase_alphabet: highestLowercaseAlphabet,

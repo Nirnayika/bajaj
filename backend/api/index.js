@@ -1,3 +1,6 @@
-const app = require('../server.js');
+const app = require('../server');
 
-module.exports = app;
+module.exports = (req, res) => {
+  // Handle requests with the Express app
+  app(req, res);
+};
